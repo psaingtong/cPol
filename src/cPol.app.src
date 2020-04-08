@@ -1,11 +1,10 @@
 {application, cPol,
- [{description, "An OTP application"},
+ [{description, "cPol application"},
   {vsn, "0.1.0"},
   {registered, []},
   {mod, {cPol_app, []}},
   {applications,
-   [kernel,
-    stdlib
+   [kernel, stdlib
    ]},
   {env,[]},
   {modules, []},

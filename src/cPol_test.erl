@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(cPol_test).
 -author("datawiz5").
-
+-include("cPol_db.hrl").
 %% API
 -export([test1/0, parse/1]).
 

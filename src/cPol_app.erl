@@ -10,8 +10,19 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-    cPol_test:test1(),
-    cPol_test:parse("/home/datawiz5/utth/drg-dev2/e_dxcode1.csv"),
+    case mnesia:system_info(use_dir) of
+        true ->
+            io:format("D Test OK--------~n"),
+            ok;
+        false ->
+            io:format("D Test fail--------~n"),
+            cPol_db:install()
+    end,
+    %cPol_test:test1(),
+    Te1=cPol_db:get_an("6300123"),
+    %io:format("D Test--------~p~n",[Te1]),
+    cPol_pcl:init(),
+    %cPol_test:parse("/home/wt/wt-dev/github-dev/cc_a_test1.csv"),
     cPol_sup:start_link().
 
 stop(_State) ->

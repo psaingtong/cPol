@@ -12,10 +12,8 @@
 start(_StartType, _StartArgs) ->
     case mnesia:system_info(use_dir) of
         true ->
-            io:format("D Test OK--------~n"),
             ok;
         false ->
-            io:format("D Test fail--------~n"),
             cPol_db:install()
     end,
     %cPol_test:test1(),

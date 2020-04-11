@@ -10,7 +10,7 @@
 -author("datawiz5").
 -include("cPol_db.hrl").
 %% API
--export([test1/0, parse/1]).
+-export([test1/0, parse/1, importcode/1]).
 
 test1() ->
   T1=lists:sort(fun({KeyA,ValA}, {KeyB,ValB}) -> {ValA,KeyA} =< {ValB,KeyB} end, [{a,b},{b,a},{b,b}]),
@@ -51,3 +51,31 @@ traverse_text(Text,Buff)->
 
 clean(Text,Char)->
   string:strip(string:strip(Text,right,Char),left,Char).
+
+importcode(FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    %io:format("Line: ~p~n",[Line]),
+    [H|L]=Line,
+
+    F = fun() ->
+      mnesia:write(
+        #cPol_icd10{code=H})
+        end,
+    ok = mnesia:activity(transaction, F),
+    %even_print(L),
+
+    Buffer
+                end,
+
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+even_print([])-> [];
+even_print([H|T]) ->
+  io:format("printing: ~p~n", [H]),
+
+  [H].
+

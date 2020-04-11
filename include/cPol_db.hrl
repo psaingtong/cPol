@@ -20,3 +20,9 @@
   sdx8 :: binary(),
   sdx9 :: binary()
 }).
+
+-record(cPol_icd10,
+{ code :: binary(),
+  memo :: binary(),
+  premcd :: binary()
+}).

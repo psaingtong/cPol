@@ -33,8 +33,7 @@ install() ->
   %{ok,RR} = mnesia:change_config(dump_log_write_threshold, 2000),
   %Info = mnesia:system_info(dump_log_write_threshold),
   %io:format("Info : ~p~n",[Info]),
-  ok = create_icd10_table(Nodes),
-  ok = create_test_table(Nodes).
+  ok = create_icd10_table(Nodes).
 
 -spec create_test_table([node()]) -> ok.
 create_test_table(Nodes) ->

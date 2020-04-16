@@ -58,7 +58,7 @@ importcode(FilePath)->
     [H|L]=Line,
 
     F = fun() ->
-      mnesia:write(
+      mnesia:dirty_write(
         #cPol_icd10{code=H})
         end,
     ok = mnesia:activity(transaction, F),

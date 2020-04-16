@@ -4,7 +4,8 @@
   {registered, []},
   {mod, {cPol_app, []}},
   {applications,
-   [kernel, stdlib, mnesia
+   [kernel, stdlib, cowboy, iso8601, jiffy, erlydtl, gen_smtp, enacl,
+    mnesia, crypto, public_key, ssl, inets, runtime_tools, sasl, parse_trans
    ]},
   {env,[]},
   {modules, []},

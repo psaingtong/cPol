@@ -1,13 +1,8 @@
 %%%-------------------------------------------------------------------
-%%% @author datawiz5
-%%% @copyright (C) 2020, <COMPANY>
-%%% @doc
-%%%
-%%% @end
 %%% Created : 08. Apr 2020 17:26 น.
 %%%-------------------------------------------------------------------
 -module(cPol_test).
--author("datawiz5").
+
 -include("cPol_db.hrl").
 %% API
 -export([test1/0, parse/1, importcode/1]).

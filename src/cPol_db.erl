@@ -1,22 +1,17 @@
 %%%-------------------------------------------------------------------
-%%% @author wt
-%%% @copyright (C) 2020, <COMPANY>
-%%% @doc
-%%%
-%%% @end
 %%% Created : 09. Apr 2020 10:21 น.
 %%%-------------------------------------------------------------------
 -module(cPol_db).
--author("wt").
+
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
 -export_type([test1/0]).
--export_type([icd10/0]).
--export([install/0, get_an/1, get_code/1]).
+
+-export([install/0, get_an/1]).
 
 -opaque test1() :: #cPol_test1{}.
--opaque icd10() :: #cPol_icd10{}.
+
 
 install() ->
   Nodes = [node()],
@@ -24,16 +19,8 @@ install() ->
 
   ok = mnesia:create_schema(Nodes),
   ok = application:start(mnesia),
-  %{ok,R} = mnesia:change_config({dc_dump_limit, 40},{dump_log_write_threshold, 50000}),
-  %Info1 = mnesia:system_info(dc_dump_limit),
-  %io:format("Info1 : ~p~n",[Info1]),
-  %{ok,R} = mnesia:change_config(dc_dump_limit, 40),
-  %Info2 = mnesia:system_info(dc_dump_limit),
-  %io:format("Info : ~p~n",[Info2]),
-  %{ok,RR} = mnesia:change_config(dump_log_write_threshold, 2000),
-  %Info = mnesia:system_info(dump_log_write_threshold),
-  %io:format("Info : ~p~n",[Info]),
-  ok = create_icd10_table(Nodes).
+  cPol_icd10:create_table(Nodes),
+  ok = create_test_table(Nodes).
 
 -spec create_test_table([node()]) -> ok.
 create_test_table(Nodes) ->
@@ -73,24 +60,5 @@ get_an(An) ->
       undefined
   end .
 
--spec create_icd10_table([node()]) -> ok.
-create_icd10_table(Nodes) ->
-  {atomic, ok} = mnesia:create_table(cPol_icd10,
-    [{attributes, record_info(fields, cPol_icd10)},
-      {disc_copies, Nodes}]),
-  ok.
 
--spec get_code(binary()) -> icd10() | undefined.
-get_code(Code) ->
-  F = fun() ->
-    qlc:e(qlc:q(
-      [X || X = #cPol_icd10{code=C} <- mnesia:table(cPol_icd10),
-        string:equal(Code, C, true)]))
-      end,
-  case mnesia:activity(transaction, F) of
-    [Icd10] ->
-      Icd10;
-    _ ->
-      undefined
-  end .
 

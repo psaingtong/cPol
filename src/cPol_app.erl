@@ -14,6 +14,7 @@ start(_StartType, _StartArgs) ->
         false ->
             cPol_db:install()
     end,
+    cPol_icd10:list_data("/home/datawiz5/utth/cc/p050.csv"),
     %cPol_test:test1(),
     %Te1=cPol_db:get_an("6300123"),
     %io:format("D Test--------~p~n",[Te1]),

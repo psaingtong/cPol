@@ -8,7 +8,7 @@
 -include_lib("stdlib/include/qlc.hrl").
 
 -export_type([icd10/0]).
--export([create_table/1, get_code/1]).
+-export([create_table/1, get_code/1, import_code/1, list_data/1]).
 
 -opaque icd10() :: #cPol_icd10{}.
 
@@ -32,3 +32,63 @@ get_code(Code) ->
     _ ->
       undefined
   end .
+
+import_code(FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    %io:format("Line: ~p~n",[Line]),
+    [H|L]=Line,
+    F = fun() ->
+      mnesia:dirty_write(
+        #cPol_icd10{code=H})
+        end,
+    ok = mnesia:activity(transaction, F),
+    Buffer
+                end,
+
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+list_data(FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    %io:format("Line: ~p~n",[Line]),
+    [H|[]]=Line,
+
+    io:format("Line: ~p~n",[H]),
+    Buffer
+                end,
+
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+start_parsing(S,ForEachLine,Opaque)->
+  Line = io:get_line(S,''),
+  case Line of
+    eof -> {ok,Opaque};
+    "\n" -> start_parsing(S,ForEachLine,Opaque);
+    "\r\n" -> start_parsing(S,ForEachLine,Opaque);
+    _ ->
+      NewOpaque = ForEachLine(scanner(clean(clean(Line,10),13)),Opaque),
+      start_parsing(S,ForEachLine,NewOpaque)
+  end.
+
+scan(InitString,Char,[Head|Buffer]) when Head == Char ->
+  {lists:reverse(InitString),Buffer};
+scan(InitString,Char,[Head|Buffer]) when Head =/= Char ->
+  scan([Head|InitString],Char,Buffer);
+scan(X,_,Buffer) when Buffer == [] -> {done,lists:reverse(X)}.
+scanner(Text)-> lists:reverse(traverse_text(Text,[])).
+
+traverse_text(Text,Buff)->
+  case scan("",$,,Text) of
+    {done,SomeText}-> [SomeText|Buff];
+    {Value,Rem}-> traverse_text(Rem,[Value|Buff])
+  end.
+
+clean(Text,Char)->
+  string:strip(string:strip(Text,right,Char),left,Char).

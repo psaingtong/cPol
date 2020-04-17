@@ -16,7 +16,10 @@ init() ->
       {ValA,KeyA} >= {ValB,KeyB}
     end
     ,Data),
-  %io:format("Test1: ~p~n",[T1]),
+  io:format("Test1: ~p~n",[T1]),
+  F = fun ({_,0}) -> false ; (_) -> true end,
+  T2=lists:filter(F, T1),
+  io:format("Test2: ~p~n",[T2]),
   %T2=lists:sort(fun({_,ValA}) -> io:format("Test2*****: ~p~n",[ValA]) end,Data),
   %io:format("Test2: ~p~n",[T2]),
   T1.

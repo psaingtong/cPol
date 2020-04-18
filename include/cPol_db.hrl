@@ -45,3 +45,9 @@
   scode :: binary(),
   dcl :: binary()
 }).
+
+-record(cPol_dcl_test,
+{ mcode :: binary(),
+  scode :: binary(),
+  dcl :: binary()
+}).

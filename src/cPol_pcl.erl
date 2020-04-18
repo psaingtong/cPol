@@ -9,31 +9,24 @@
 
 init() ->
   Data=[{"I213",2},{"E119",1},{"I10",1},{"N182",0},{"I092",1},{"K250",3},{"I209",0},{"A419",2},{"E875",1},{"E876",1}],
-  %Data=[{"I213",2},{"E119",1},{"I10",1},{"I092",1},{"K250",3},{"A419",2},{"E875",1},{"E876",1}],
-  %io:format("Data: ~p~n",[Data]),
   T1=lists:sort(
     fun({KeyA,ValA}, {KeyB,ValB}) ->
       {ValA,KeyA} >= {ValB,KeyB}
     end
     ,Data),
-  io:format("Test1: ~p~n",[T1]),
+
   F = fun ({_,0}) -> false ; (_) -> true end,
   T2=lists:filter(F, T1),
   io:format("Test2: ~p~n",[T2]),
-  %T2=lists:sort(fun({_,ValA}) -> io:format("Test2*****: ~p~n",[ValA]) end,Data),
-  %io:format("Test2: ~p~n",[T2]),
-  T1.
+
+  T2.
 
 
 even_print([])-> [];
 even_print([H|T]) ->
   %io:format("printing: ~p~n", [H]),
   {H1,H2}=H,
-  if
-    H2>0 -> io:format("key: ~p~n", [H1]),
-      even_print1(T);
-    true -> undefine
-  end,
+  io:format("key: ~p~n", [H1]),
   [H|even_print(T)].
 
 even_print1([])-> [];

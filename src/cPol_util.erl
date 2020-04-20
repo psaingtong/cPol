@@ -46,3 +46,14 @@ recursively_list_dir([Path|Paths], FilesOnly, Acc) ->
             false -> [Path | Acc]
           end)
     end).
+
+even_list([])-> [];
+even_list([H|T]) ->
+  case string:find(H,":") of
+    nomatch->
+      %io:format("----------~n"),
+      ok;
+    _ -> io:format("Value:~p~n",[H])
+  end,
+  %io:format("Value: ~p~n", [H]),
+  [H|even_list(T)].

@@ -51,3 +51,20 @@
   scode :: binary(),
   dcl :: binary()
 }).
+
+-record(cPol_ipd,
+{ an :: binary(),
+  hn :: binary(),
+  sex :: binary(),
+  pdx :: binary(),
+  sdx :: binary(),
+  proc :: binary(),
+  dob :: erlang:timestamp(),
+  age :: binary(),
+  admwt :: integer(),
+  discht :: binary(),
+  admdt :: erlang:timestamp(),
+  dischdt :: erlang:timestamp(),
+  lday :: integer(),
+  los :: integer()
+}).

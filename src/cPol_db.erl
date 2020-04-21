@@ -21,6 +21,7 @@ install() ->
   ok = application:start(mnesia),
   cPol_icd10:create_table(Nodes),
   cPol_pcl:create_table(Nodes),
+  cPol_ipd:create_table(Nodes),
   ok = create_test_table(Nodes).
 
 -spec create_test_table([node()]) -> ok.

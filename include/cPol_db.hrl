@@ -19,7 +19,11 @@
 -record(cPol_icd10,
 { code :: binary(),
   memo :: binary(),
-  premcd :: binary()
+  premcd :: binary(),
+  das :: binary(),
+  un_pdx :: binary(),
+  age :: binary(),
+  sex :: binary()
 }).
 
 -record(cPol_dcl_ae,

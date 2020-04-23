@@ -3,6 +3,8 @@
 %%%-------------------------------------------------------------------
 -module(cPol_ipd).
 
+-include("cPol_db.hrl").
+-include_lib("stdlib/include/qlc.hrl").
 %% API
 -export([create_table/1]).
 

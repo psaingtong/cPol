@@ -37,14 +37,17 @@ import_code(FilePath)->
   ForEachLine = fun(Line,Buffer)->
     %io:format("Line: ~p~n",[Line]),
     [H|L]=Line,
-    F = fun() ->
-      mnesia:dirty_write(
-        #cPol_icd10{code=H})
-        end,
-    ok = mnesia:activity(transaction, F),
+    case get_code(H) of
+      undefined ->
+      F = fun() ->
+        mnesia:dirty_write(
+          #cPol_icd10{code=H})
+          end,
+        ok = mnesia:activity(transaction, F);
+      _ ->ok
+    end,
     Buffer
                 end,
-
   case file:open(FilePath,[read]) of
     {_,S} ->
       start_parsing(S,ForEachLine,[]);

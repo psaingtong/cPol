@@ -8,4 +8,7 @@
 
 generate(mcd01, Ipd) ->
   io:format("Ipd*********: ~p~n", [Ipd]),
+  ok;
+generate(mcd02, Ipd) ->
+  io:format("Ipd*********: ~p~n", [Ipd]),
   ok.

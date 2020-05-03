@@ -35,7 +35,7 @@ get_code(Code) ->
 
 import_code(FilePath)->
   ForEachLine = fun(Line,Buffer)->
-    %io:format("Line: ~p~n",[Line]),
+    io:format("Line: ~p~n",[Line]),
     [H|L]=Line,
     case get_code(H) of
       undefined ->

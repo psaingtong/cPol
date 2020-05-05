@@ -6,7 +6,7 @@
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
--export([create_table/1, init_sample/0, test/0, an/1, pdx/1, sdx/1]).
+-export([create_table/1, init_sample/0, test/0, an/1, pdx/1, sdx/1, get_an/1]).
 -export_type([ipd/0]).
 
 -opaque ipd() :: #cPol_ipd{}.

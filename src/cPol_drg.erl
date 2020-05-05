@@ -5,7 +5,7 @@
 
 
 %% API
--export([check_pdx/1]).
+-export([check_pdx/1, get_drg/1]).
 
 check_pdx(Pdx) ->
   io:format("Pdx----->~p ~n",[Pdx]),
@@ -21,3 +21,11 @@ check_pdx(Pdx) ->
   end,
 
   io:format("check Drg ~n").
+
+get_drg(An) ->
+  A1=cPol_ipd:get_an(An),
+  %io:format("An Test--------~p~n",[A1]),
+  Pdx_db=cPol_ipd:pdx(A1),
+  io:format("Pdx DB--------~p~n",[Pdx_db]),
+  io:format("AN===> ~p~n",[An]).
+

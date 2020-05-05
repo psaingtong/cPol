@@ -5,7 +5,7 @@
 -record(cPol_icd10,
 { code :: binary(),
   memo :: binary(),
-  premcd :: binary(),
+  mdc :: binary(),
   das :: binary(),
   un_pdx :: binary(),
   age :: binary(),

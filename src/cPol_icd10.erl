@@ -8,7 +8,7 @@
 -include_lib("stdlib/include/qlc.hrl").
 
 -export_type([icd10/0]).
--export([create_table/1, get_code/1, import_code/1, list_data/1]).
+-export([create_table/1, get_code/1, check_pdx/1, check_dx/1, code/1, mdc/1, das/1,un_pdx/1,age/1,sex/1]).
 
 -opaque icd10() :: #cPol_icd10{}.
 
@@ -18,6 +18,96 @@ create_table(Nodes) ->
     [{attributes, record_info(fields, cPol_icd10)},
       {disc_copies, Nodes}]),
   ok.
+check_dx(Ipd) ->
+  Cpdx=cPol_ipd:pdx(Ipd),
+  %io:format("Pdx db--- ~p~n",[Cpdx]),
+  case get_code(Cpdx) of
+    undefined->
+      ok;
+    Icd10 ->
+      %io:format("Cpdx--------~p~n",[Icd10]),
+      %%A2
+      case un_pdx(Icd10) of
+        undefined->
+          %%A3
+          case age(Icd10) of
+            undefined->
+              %%A4
+              case sex(Icd10) of
+                undefined->code(Icd10);
+                Sex ->
+                  io:format("---code sex---~p~n",[Sex]),
+                  io:format("---sex relate dx---~n"),
+                  undefined
+              end;
+
+            Age ->
+              %io:format("---code age---~p~n",[Age]),
+              case dx_check_age(Age,cPol_ipd:age(Ipd)) of
+                  undefined->
+                    io:format("---age relate dx---~n"),
+                    undefined;
+                _ ->
+                  code(Icd10)
+
+              end
+
+          end;
+        _ ->
+          io:format("---unaccept dx---~n"),
+          undefined
+      end
+    %io:format("Cpdx--------~p~n",[Icd10]),
+    %code(Icd10)
+  end.
+
+dx_check_age(Age,A1) ->
+  if
+    Age =:="PIF" ->
+      if
+         A1>1->
+           %io:format("Pass Age------~n"),
+           ok ;
+        true -> undefined
+      end;
+
+    true -> undefined
+  end.
+
+
+
+check_pdx(Cpdx) ->
+  io:format("Pdx db--- ~p~n",[Cpdx]),
+  case get_code(Cpdx) of
+    undefined->
+    ok;
+    Icd10 ->
+      io:format("Cpdx--------~p~n",[Icd10]),
+      %%A2
+      case un_pdx(Icd10) of
+        undefined->
+          %%A3
+          case age(Icd10) of
+            undefined->
+              %%A4
+              case sex(Icd10) of
+                undefined->code(Icd10);
+                _ ->
+                  io:format("---sex relate dx---~n"),
+                  undefined
+              end;
+
+            _ ->
+              io:format("---age relate dx---~n"),
+              undefined
+          end;
+        _ ->
+          io:format("---unaccept dx---~n"),
+          undefined
+      end
+      %io:format("Cpdx--------~p~n",[Icd10]),
+      %code(Icd10)
+  end.
 
 -spec get_code(binary()) -> icd10() | undefined.
 get_code(Code) ->
@@ -33,65 +123,21 @@ get_code(Code) ->
       undefined
   end .
 
-import_code(FilePath)->
-  ForEachLine = fun(Line,Buffer)->
-    io:format("Line: ~p~n",[Line]),
-    [H|L]=Line,
-    case get_code(H) of
-      undefined ->
-      F = fun() ->
-        mnesia:dirty_write(
-          #cPol_icd10{code=H})
-          end,
-        ok = mnesia:activity(transaction, F);
-      _ ->ok
-    end,
-    Buffer
-                end,
-  case file:open(FilePath,[read]) of
-    {_,S} ->
-      start_parsing(S,ForEachLine,[]);
-    Error -> Error
-  end.
-
-list_data(FilePath)->
-  ForEachLine = fun(Line,Buffer)->
-    %io:format("Line: ~p~n",[Line]),
-    [H|[]]=Line,
-
-    io:format("Line: ~p~n",[H]),
-    Buffer
-                end,
-
-  case file:open(FilePath,[read]) of
-    {_,S} ->
-      start_parsing(S,ForEachLine,[]);
-    Error -> Error
-  end.
-
-start_parsing(S,ForEachLine,Opaque)->
-  Line = io:get_line(S,''),
-  case Line of
-    eof -> {ok,Opaque};
-    "\n" -> start_parsing(S,ForEachLine,Opaque);
-    "\r\n" -> start_parsing(S,ForEachLine,Opaque);
-    _ ->
-      NewOpaque = ForEachLine(scanner(clean(clean(Line,10),13)),Opaque),
-      start_parsing(S,ForEachLine,NewOpaque)
-  end.
-
-scan(InitString,Char,[Head|Buffer]) when Head == Char ->
-  {lists:reverse(InitString),Buffer};
-scan(InitString,Char,[Head|Buffer]) when Head =/= Char ->
-  scan([Head|InitString],Char,Buffer);
-scan(X,_,Buffer) when Buffer == [] -> {done,lists:reverse(X)}.
-scanner(Text)-> lists:reverse(traverse_text(Text,[])).
-
-traverse_text(Text,Buff)->
-  case scan("",$,,Text) of
-    {done,SomeText}-> [SomeText|Buff];
-    {Value,Rem}-> traverse_text(Rem,[Value|Buff])
-  end.
-
-clean(Text,Char)->
-  string:strip(string:strip(Text,right,Char),left,Char).
+-spec code(icd10()) -> binary().
+code(Icd10) ->
+  Icd10#cPol_icd10.code.
+-spec mdc(icd10()) -> binary().
+mdc(Icd10) ->
+  Icd10#cPol_icd10.mdc.
+-spec das(icd10()) -> binary().
+das(Icd10) ->
+  Icd10#cPol_icd10.das.
+-spec un_pdx(icd10()) -> binary().
+un_pdx(Icd10) ->
+  Icd10#cPol_icd10.un_pdx.
+-spec age(icd10()) -> binary().
+age(Icd10) ->
+  Icd10#cPol_icd10.age.
+-spec sex(icd10()) -> binary().
+sex(Icd10) ->
+  Icd10#cPol_icd10.sex.

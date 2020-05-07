@@ -6,15 +6,15 @@
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
--export([get_dc/1, create_table/1,import_data/0]).
--export_type([mdc/0]).
+-export([get_dc/1, create_table/1,import_data/0,get_icd10/1]).
+-export_type([dc/0]).
 
--opaque mdc() :: #cPol_mdc{}.
+-opaque dc() :: #cPol_dc{}.
 
 -spec create_table([node()]) -> ok.
 create_table(Nodes) ->
-  {atomic, ok} = mnesia:create_table(cPol_mdc,
-    [{attributes, record_info(fields, cPol_mdc)},
+  {atomic, ok} = mnesia:create_table(cPol_dc,
+    [{attributes, record_info(fields, cPol_dc)},
       {disc_copies, Nodes}]),
   ok.
 
@@ -33,17 +33,18 @@ import_data()->
   FilePathName=string:join([FilePath, FileName], "/"),
   ForEachLine = fun(Line,Buffer)->
     [A,B|[]]=Line,
-    io:format("Line: ~p~p~n",[A,B]),
-    case get_icd10(Mdc1,A) of
+    M11="5",
+    %io:format("Line: ~p~p~n",[A,B]),
+    case get_icd10(A) of
         undefined->
+          io:format("New-------~n"),
           F = fun() ->
             mnesia:dirty_write(
-              #cPol_mdc{mdc=Mdc1,icd10=A,pdc10=B})
+              #cPol_dc{mdc=M11,icd10=A,pdc10=B})
               end,
-          ok = mnesia:activity(transaction, F),
-          io:format("********* ~p~p~n",[A,B]);
+          ok = mnesia:activity(transaction, F);
 
-      Mdc ->io:format("***old key***~n")
+      _ -> io:format("Old--------~p~n",[A])
     end,
     Buffer
                 end,
@@ -80,26 +81,16 @@ traverse_text(Text,Buff)->
 clean(Text,Char)->
   string:strip(string:strip(Text,right,Char),left,Char).
 
--spec get_icd10(binary(),binary()) -> mdc() | undefined.
-get_icd10(Mdc,Code) ->
+-spec get_icd10(binary()) -> dc() | undefined.
+get_icd10(Code) ->
   F = fun() ->
     qlc:e(qlc:q(
-      [X || X = #cPol_mdc{mdc=M} <- mnesia:table(cPol_mdc),
-        string:equal(Mdc, M, true)]))
+      [X || X = #cPol_dc{icd10=C} <- mnesia:table(cPol_dc),
+        string:equal(Code, C, true)]))
       end,
   case mnesia:activity(transaction, F) of
-    [Mdc] ->
-      F1 = fun() ->
-        qlc:e(qlc:q(
-          [X || X = #cPol_mdc{icd10=C} <- mnesia:table(cPol_mdc),
-            string:equal(Code, C, true)]))
-          end,
-      case mnesia:activity(transaction, F1) of
-        [Mdc] ->
-          Mdc;
-        _ ->
-          undefined
-          end;
+    [Dc] ->
+      Dc;
     _ ->
       undefined
   end .

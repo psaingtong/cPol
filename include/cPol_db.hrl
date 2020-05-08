@@ -12,15 +12,11 @@
   sex :: binary()
 }).
 
--record(cPol_mdc,
-{ mdc :: binary(),
-  icd10 :: binary(),
-  pdc10 :: binary(),
-  icd9 :: binary(),
-  pdc9 :: binary(),
-  ax_bx :: binary(),
-  ax_pbx :: binary(),
-  dd :: binary(),
+-record(cPol_dc,
+{ code :: binary(),
+  mdc :: binary(),
+  key :: binary(),
+  ax :: binary(),
   memo :: binary()
 }).
 

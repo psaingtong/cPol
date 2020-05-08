@@ -6,7 +6,7 @@
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
--export([get_dc/1, create_table/1,import_data/0,get_icd10/1]).
+-export([get_dc/1, create_table/1,import_data/0,get_icd10/1, check_data/0, import_data_ax/0]).
 -export_type([dc/0]).
 
 -opaque dc() :: #cPol_dc{}.
@@ -28,23 +28,80 @@ get_dc(Mdc)->
 
 import_data()->
   FilePath="data/mdc/5",
+  %FileName="ax_5pfx.csv",
+  %B="ax_5bx",
   FileName="mdc5_icd10.csv",
-  Mdc1="5",
   FilePathName=string:join([FilePath, FileName], "/"),
   ForEachLine = fun(Line,Buffer)->
     [A,B|[]]=Line,
-    M11="5",
+    Mgr="5",
     %io:format("Line: ~p~p~n",[A,B]),
     case get_icd10(A) of
         undefined->
-          io:format("New-------~n"),
           F = fun() ->
             mnesia:dirty_write(
-              #cPol_dc{mdc=M11,icd10=A,pdc10=B})
+              #cPol_dc{mdc=Mgr,code=A,key=B})
               end,
           ok = mnesia:activity(transaction, F);
 
-      _ -> io:format("Old--------~p~n",[A])
+      _ ->
+        io:format("Old--------~p~n",[A]),
+        ok
+    end,
+    Buffer
+                end,
+  case file:open(FilePathName,[read]) of
+    {_,S} ->
+      start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+import_data_ax()->
+  FilePath="data/mdc/5",
+  FileName="ax_5bx.csv",
+  B="ax_5bx",
+  FilePathName=string:join([FilePath, FileName], "/"),
+  ForEachLine = fun(Line,Buffer)->
+    [A|[]]=Line,
+    %io:format("Line: ~p~p~n",[A,B]),
+    case get_icd10(A) of
+      undefined->
+        F = fun() ->
+          mnesia:dirty_write(
+            #cPol_dc{code=A,ax=B})
+            end,
+        ok = mnesia:activity(transaction, F);
+
+      Dc ->
+        io:format("Old--------~p~n",[A]),
+        F = fun() ->
+          mnesia:dirty_write(
+            Dc#cPol_dc{ax=B})
+             end,
+        ok = mnesia:activity(transaction, F)
+    end,
+    Buffer
+                end,
+  case file:open(FilePathName,[read]) of
+    {_,S} ->
+      start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+check_data()->
+  FilePath="data/mdc/5",
+  FileName="ax_5pdx.csv",
+  %FileName="mdc5_icd9.csv",
+  FilePathName=string:join([FilePath, FileName], "/"),
+  ForEachLine = fun(Line,Buffer)->
+    [A,B|[]]=Line,
+    %io:format("Line: ~p~p~n",[A,B]),
+    case get_icd10(A) of
+      undefined->
+        io:format("New--------~p~n",[A]);
+      _ ->
+        io:format("Old--------~p~n",[A]),
+        ok
     end,
     Buffer
                 end,
@@ -85,7 +142,7 @@ clean(Text,Char)->
 get_icd10(Code) ->
   F = fun() ->
     qlc:e(qlc:q(
-      [X || X = #cPol_dc{icd10=C} <- mnesia:table(cPol_dc),
+      [X || X = #cPol_dc{code=C} <- mnesia:table(cPol_dc),
         string:equal(Code, C, true)]))
       end,
   case mnesia:activity(transaction, F) of

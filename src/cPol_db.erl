@@ -21,6 +21,8 @@ install() ->
   ok = mnesia:create_schema(Nodes),
   ok = application:start(mnesia),
   cPol_icd10:create_table(Nodes),
+  cPol_pcl:create_table(Nodes),
+  cPol_cc:create_table(Nodes),
   cPol_mdc:create_table(Nodes),
   cPol_ipd:create_table(Nodes).
 
@@ -36,12 +38,15 @@ import_data(FilePath,FileName)->
     [A,B|[]]=Line,
     io:format("Line: ~p~p~n",[A,B]),
     case get_code(A) of
-      undefined ->F = fun() ->
+      undefined ->
+        io:format("new new:-----~n"),
+        F = fun() ->
         mnesia:dirty_write(
           #cPol_icd10{code=A,mdc=B})
                       end,
         ok = mnesia:activity(transaction, F);
       _ ->
+        io:format("old old:-----~n"),
         ok
     end,
     Buffer

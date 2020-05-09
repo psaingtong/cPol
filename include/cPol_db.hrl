@@ -49,6 +49,12 @@
   scode :: binary(),
   dcl :: binary()
 }).
+-record(cPol_cc,
+{ ccode :: binary(),
+  un_code :: binary(),
+  memo :: binary()
+}).
+
 
 -record(cPol_ipd,
 { an :: binary(),

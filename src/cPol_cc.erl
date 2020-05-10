@@ -39,9 +39,24 @@ import_data()->
   ForEachLine = fun(Line,Buffer)->
     [A,B|[]]=Line,
     %io:format("Line--: ~p~n",[Line]),
-    io:format("~p--~p~n",[A,B]),
+    %io:format("~p--~p~n",[A,B]),
     HH=string:tokens(B, " "),
-    io:format("~p--+-- ~p~n", [A,HH]),
+    %io:format("~p--+-- ~p~n", [A,HH]),
+    case Line of
+        [[],[]]->%io:format("-------------~n"),
+          ok;
+      _->%io:format("Line--: ~p~n",[Line]),
+        case A of
+          []->
+            io:format("-----Sub-----~p~n",[HH]),
+            even_list_cc(HH);
+          A ->
+            io:format("--Main----~p~p~n",[A,HH]),
+            even_list_cc(HH)
+
+        end
+
+    end,
     %case Line of
      % [[],[]]->io:format("-------------~n");
       %_->
@@ -65,8 +80,8 @@ even_list_cc([H|T]) ->
   %[A,[]]=T,
   %HH=string:tokens(A, " "),
   %io:format("-- ~p~n", [HH]),
-  %even_list_cc([T]),
-  io:format("** ~p~n", [T]).
+  even_list_cc(T).
+  %io:format("** ~p~n", [T]).
 
 
 
@@ -98,16 +113,23 @@ clean(Text,Char)->
   string:strip(string:strip(Text,right,Char),left,Char).
 
 get_value_in_range(S) ->
-  SSS="I980-I989",
-  HH=string:tokens(SSS, "-"),
+  S1="I980-I989",
+  HH=string:tokens(S1, "-"),
   [A,B]=HH,
   A0=string:slice(A, 0,1),
-  A1=string:slice(A, 1),
-  B1=string:slice(B, 1),
-  From=list_to_integer(A1),
-  To=list_to_integer(B1),
-  io:format("From: ~p --+--To: ~p~n", [From,To]),
-  lists:foreach(
-    fun(I) ->  AAA=A0++integer_to_list(I),io:format("~p~n", [AAA] ) end,
-    lists:seq(From, To)
-  ).
+  From=list_to_integer(string:slice(A, 1)),
+  To=list_to_integer(string:slice(B, 1)),
+  %lists:foreach(fun(I) ->  AAA=A0++integer_to_list(I),io:format("~p", [AAA] ) end, lists:seq(From, To)),
+  GG=lists:seq(From, To),
+  H4=even_list_cc1(A0,GG),
+  io:format("=======>~p~n", [H4]),
+  io:format("--------------------------------------~n"),
+  H4.
+
+even_list_cc1(A0,[])-> [];
+even_list_cc1(A0,[H|T]) ->
+  A1=A0++integer_to_list(H),
+  %io:format("*--- ~p~n", [A1]),
+  A2=[A1]++even_list_cc1(A0,T),
+  even_list_cc1(A0,T),
+  A2.

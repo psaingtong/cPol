@@ -35,14 +35,14 @@ init_icd10() ->
 import_data(FilePath,FileName)->
   FilePathName=string:join([FilePath, FileName], "/"),
   ForEachLine = fun(Line,Buffer)->
-    [A,B|[]]=Line,
+    [A,B,C|[]]=Line,
     io:format("Line: ~p~p~n",[A,B]),
     case get_code(A) of
       undefined ->
         io:format("new new:-----~n"),
         F = fun() ->
         mnesia:dirty_write(
-          #cPol_icd10{code=A,mdc=B})
+          #cPol_icd10{code=A,mdc=B,dcl=C})
                       end,
         ok = mnesia:activity(transaction, F);
       _ ->
@@ -53,7 +53,7 @@ import_data(FilePath,FileName)->
                 end,
   case file:open(FilePathName,[read]) of
     {_,S} ->
-      start_parsing(S,ForEachLine,[]);
+      cPol_util:start_parsing(S,ForEachLine,[]);
     Error -> Error
   end.
 
@@ -85,7 +85,7 @@ update_data_un_pdx(FilePath,FileName)->
                 end,
   case file:open(FilePathName,[read]) of
     {_,S} ->
-      start_parsing(S,ForEachLine,[]);
+      cPol_util:start_parsing(S,ForEachLine,[]);
     Error -> Error
   end.
 %%A3
@@ -116,7 +116,7 @@ update_data_age(FilePath,FileName)->
                 end,
   case file:open(FilePathName,[read]) of
     {_,S} ->
-      start_parsing(S,ForEachLine,[]);
+      cPol_util:start_parsing(S,ForEachLine,[]);
     Error -> Error
   end.
 %%A4
@@ -147,7 +147,7 @@ update_data_sex(FilePath,FileName)->
                 end,
   case file:open(FilePathName,[read]) of
     {_,S} ->
-      start_parsing(S,ForEachLine,[]);
+      cPol_util:start_parsing(S,ForEachLine,[]);
     Error -> Error
   end.
 %%das
@@ -181,37 +181,10 @@ update_data(FilePath,FileName)->
                 end,
   case file:open(FilePathName,[read]) of
     {_,S} ->
-      start_parsing(S,ForEachLine,[]);
+      cPol_util:start_parsing(S,ForEachLine,[]);
     Error -> Error
   end.
 
-
-start_parsing(S,ForEachLine,Opaque)->
-  Line = io:get_line(S,''),
-  case Line of
-    eof -> {ok,Opaque};
-    "\n" -> start_parsing(S,ForEachLine,Opaque);
-    "\r\n" -> start_parsing(S,ForEachLine,Opaque);
-    _ ->
-      NewOpaque = ForEachLine(scanner(clean(clean(Line,10),13)),Opaque),
-      start_parsing(S,ForEachLine,NewOpaque)
-  end.
-
-scan(InitString,Char,[Head|Buffer]) when Head == Char ->
-  {lists:reverse(InitString),Buffer};
-scan(InitString,Char,[Head|Buffer]) when Head =/= Char ->
-  scan([Head|InitString],Char,Buffer);
-scan(X,_,Buffer) when Buffer == [] -> {done,lists:reverse(X)}.
-scanner(Text)-> lists:reverse(traverse_text(Text,[])).
-
-traverse_text(Text,Buff)->
-  case scan("",$,,Text) of
-    {done,SomeText}-> [SomeText|Buff];
-    {Value,Rem}-> traverse_text(Rem,[Value|Buff])
-  end.
-
-clean(Text,Char)->
-  string:strip(string:strip(Text,right,Char),left,Char).
 
 -spec get_code(binary()) -> icd10() | undefined.
 get_code(Code) ->

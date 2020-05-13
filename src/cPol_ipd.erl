@@ -21,7 +21,7 @@ create_table(Nodes) ->
 init_sample() ->
   An="6300123",
   Pdx="I213",
-  Sdx="E119:I10:N182:E875:A419:I209",
+  Sdx="E119:I10:N182:E875:A419:I209:E876:K250:I092",
   Age=35,
   Sex="M",
   case get_an(An) of

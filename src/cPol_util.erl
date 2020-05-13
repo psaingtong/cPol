@@ -6,9 +6,35 @@
 -type name() :: string() | atom() | binary().
 
 %% API
--export([recursively_list_dir/1,
+-export([start_parsing/3, recursively_list_dir/1,
   recursively_list_dir/2]).
 
+start_parsing(S,ForEachLine,Opaque)->
+  Line = io:get_line(S,''),
+  case Line of
+    eof -> {ok,Opaque};
+    "\n" -> start_parsing(S,ForEachLine,Opaque);
+    "\r\n" -> start_parsing(S,ForEachLine,Opaque);
+    _ ->
+      NewOpaque = ForEachLine(scanner(clean(clean(Line,10),13)),Opaque),
+      start_parsing(S,ForEachLine,NewOpaque)
+  end.
+
+scan(InitString,Char,[Head|Buffer]) when Head == Char ->
+  {lists:reverse(InitString),Buffer};
+scan(InitString,Char,[Head|Buffer]) when Head =/= Char ->
+  scan([Head|InitString],Char,Buffer);
+scan(X,_,Buffer) when Buffer == [] -> {done,lists:reverse(X)}.
+scanner(Text)-> lists:reverse(traverse_text(Text,[])).
+
+traverse_text(Text,Buff)->
+  case scan("",$,,Text) of
+    {done,SomeText}-> [SomeText|Buff];
+    {Value,Rem}-> traverse_text(Rem,[Value|Buff])
+  end.
+
+clean(Text,Char)->
+  string:strip(string:strip(Text,right,Char),left,Char).
 
 -spec recursively_list_dir(Dir::name()) ->
   {ok, [string()]} | {error, atom()}.
@@ -57,3 +83,4 @@ even_list([H|T]) ->
   end,
   %io:format("Value: ~p~n", [H]),
   [H|even_list(T)].
+

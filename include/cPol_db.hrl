@@ -9,7 +9,9 @@
   das :: binary(),
   un_pdx :: binary(),
   age :: binary(),
-  sex :: binary()
+  sex :: binary(),
+  dcl :: binary(),
+  cc :: binary()
 }).
 
 -record(cPol_dc,

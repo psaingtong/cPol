@@ -16,6 +16,7 @@
 
 -record(cPol_dc,
 { code :: binary(),
+  mcode :: binary(),
   mdc :: binary(),
   key :: binary(),
   ax :: binary(),

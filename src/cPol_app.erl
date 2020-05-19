@@ -30,22 +30,36 @@ start(_StartType, _StartArgs) ->
 
     %cPol_ipd:test(),
     %%%
-    An="6300123",
-   % cPol_ipd:update_an(An),
-    Drg=cPol_drg:get_drg(An),
-    io:format("DRG--------~p~n",[Drg]),
+    %An="6300123",
+   %cPol_ipd:update_an(An),
+    %Drg=cPol_drg:get_drg(An),
+    %io:format("DRG--------~p~n",[Drg]),
     %%%
     %%Mdc - init
-    cPol_mdc:import_data(),
-
+    %cPol_mdc:check_data(),
+    %cPol_mdc:import_data(),
+    %cPol_mdc:import_data_ax(),
+    %Icd10=cPol_mdc:get_icd10("25:a812:ax"),
+    %io:format("Icd10--------~p~n",[Icd10]),
     %%%%%
     %cPol_icd10:check_pdx("c602"),
+
+    %cPol_pcl:get_pdc(),
+    %cPol_pcl:initcc(),
+
+    %%%%
+    %cPol_cc:get_value_in_range(""),
+
+    %cPol_cc:import_data(),
 
     %cPol_icd10:list_data("/home/datawiz5/utth/cc/p050.csv"),
     %cPol_icd10:import_code("/home/datawiz5/utth/ecode/e_dxcode6.csv"),
     %cPol_test:test1(),
     %Te1=cPol_db:get_an("6300123"),
     %io:format("D Test--------~p~n",[Te1]),
+
+
+    %%%%
     %Data=cPol_pcl:init(),
     %FilePath="/home/datawiz5/utth/cc_app",
     %FileName="k250.csv",
@@ -54,14 +68,11 @@ start(_StartType, _StartArgs) ->
 
     %cPol_pcl:import_data(FilePath,FileName),
 
-    %Te3=cPol_pcl:get_code("k250:0006"),
+    %Te3=cPol_pcl:get_code("i10:0011"),
     %io:format("D Test--------~p~n",[Te3]),
 
-    %cPol_util:recursively_list_dir(FilePath),
+    cPol_pcl:test(),
 
-    %cPol_test:parse("/home/wt/wt-dev/github-dev/cc_a_test1.csv"),
-    %Data=[{"I213",2},{"E119",1},{"I10",1},{"N182",0},{"I092",1},{"K250",3},{"I209",0},{"A419",2},{"E875",1},{"E876",1}],
-    %cPol_pcl:even_print(Data),
     cPol_sup:start_link().
 
 stop(_State) ->

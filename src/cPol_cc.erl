@@ -57,15 +57,6 @@ import_data()->
         end
 
     end,
-    %case Line of
-     % [[],[]]->io:format("-------------~n");
-      %_->
-       % even_list_cc(Line),
-        %io:format("Line--: ~p~n",[Line]),
-        %io:format("-------------~n")
-    %end,
-
-
     Buffer
                 end,
   case file:open(FilePathName,[read]) of
@@ -76,7 +67,14 @@ import_data()->
 
 even_list_cc([])-> [];
 even_list_cc([H|T]) ->
-  io:format("* ~p~n", [H]),
+  %io:format("* ~p~n", [H]),
+  case string:find(H,"-") of
+    nomatch->
+      io:format("**- ~p~n", [H]),
+      ok;
+    _ -> %io:format("******-~p~n",[H]),
+      get_value_in_range1(H)
+  end,
   %[A,[]]=T,
   %HH=string:tokens(A, " "),
   %io:format("-- ~p~n", [HH]),
@@ -112,8 +110,8 @@ traverse_text(Text,Buff)->
 clean(Text,Char)->
   string:strip(string:strip(Text,right,Char),left,Char).
 
-get_value_in_range(S) ->
-  S1="I980-I989",
+get_value_in_range(S1) ->
+  %S1="I980-I989",
   HH=string:tokens(S1, "-"),
   [A,B]=HH,
   A0=string:slice(A, 0,1),
@@ -123,13 +121,25 @@ get_value_in_range(S) ->
   GG=lists:seq(From, To),
   H4=even_list_cc1(A0,GG),
   io:format("=======>~p~n", [H4]),
-  io:format("--------------------------------------~n"),
+  %io:format("--------------------------------------~n"),
   H4.
+get_value_in_range1(S1) ->
+  %io:format("=======>~p~n", [S1]),
+  HH=string:tokens(S1, "-"),
+  [A,B]=HH,
+  A0=string:slice(A, 0,1),
+  From=list_to_integer(string:slice(A, 1)),
+  To=list_to_integer(string:slice(B, 1)),
+  %io:format("~p======~p=>~p~n", [A0,From,To]),
+  GG=lists:seq(From, To),
+  %io:format("GG=======>~p~n", [GG]),
+  even_list_cc1(A0,GG),
+  ok.
 
 even_list_cc1(A0,[])-> [];
 even_list_cc1(A0,[H|T]) ->
   A1=A0++integer_to_list(H),
-  %io:format("*--- ~p~n", [A1]),
-  A2=[A1]++even_list_cc1(A0,T),
-  even_list_cc1(A0,T),
-  A2.
+  io:format("*--- ~p~n", [A1]),
+  %A2=[A1]++even_list_cc1(A0,T),
+  even_list_cc1(A0,T).
+  %A2.

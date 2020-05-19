@@ -74,3 +74,12 @@ even_print([H|T]) ->
 
   [H].
 
+split(S,P) ->
+  split_h (S,P,[]).
+
+split_h([],_P,H) -> {lists:reverse(H), []};
+split_h(S,P,H) ->
+  case lists:prefix(P,S) of
+    true -> {lists:reverse(H), lists:nthtail(length(P),S)};
+    false -> [A|S2] = S, split_h(S2,P,[A|H])
+  end.

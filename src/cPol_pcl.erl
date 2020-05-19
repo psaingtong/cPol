@@ -108,9 +108,9 @@ create_table(Nodes) ->
 
 list_data(FilePath)->
   ForEachLine = fun(Line,Buffer)->
-    %io:format("Line: ~p~n",[Line]),
-    [H|[]]=Line,
-    io:format("Line: ~p~n",[H]),
+    io:format("Line: ~p~n",[Line]),
+    %[H|[]]=Line,
+    %io:format("Line: ~p~n",[H]),
     Buffer
                 end,
   case file:open(FilePath,[read]) of
@@ -122,9 +122,15 @@ list_data(FilePath)->
 test()->
   FilePath="data/dcl/a",
   {ok,HH}=cPol_util:recursively_list_dir(FilePath),
-  io:format("DDDD: ~p~n",[HH]),
+  %io:format("DDDD: ~p~n",[HH]),
+  even_list_cc(HH),
 
   ok.
+even_list_cc([])-> [];
+even_list_cc([H|T]) ->
+  io:format("::: ~p~n", [H]),
+  list_data(H),
+  even_list_cc(T).
 
 
 import_data(FilePath,FileName)->

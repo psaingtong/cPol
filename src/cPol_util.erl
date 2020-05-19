@@ -64,12 +64,13 @@ recursively_list_dir([Path|Paths], FilesOnly, Acc) ->
         [Path | Acc];
       true ->
         {ok, Listing} = file:list_dir(Path),
-        %io:format("D Listing--------~p~n",[Listing]),
+        %io:format("D Listing-+++++++++++++++-------~p~n",[Listing]),
         SubPaths = [filename:join(Path, Name) || Name <- Listing],
         recursively_list_dir(SubPaths, FilesOnly,
           case FilesOnly of
             true -> Acc;
-            false -> [Path | Acc]
+            false -> Acc
+            %false -> [Path | Acc]
           end)
     end).
 

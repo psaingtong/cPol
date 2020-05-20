@@ -23,31 +23,8 @@
   memo :: binary()
 }).
 
--record(cPol_dcl_ae,
-{ mcode :: binary(),
-  scode :: binary(),
-  dcl :: binary()
-}).
 
--record(cPol_dcl_fj,
-{ mcode :: binary(),
-  scode :: binary(),
-  dcl :: binary()
-}).
-
--record(cPol_dcl_ko,
-{ mcode :: binary(),
-  scode :: binary(),
-  dcl :: binary()
-}).
-
--record(cPol_dcl_pz,
-{ mcode :: binary(),
-  scode :: binary(),
-  dcl :: binary()
-}).
-
--record(cPol_dcl_test,
+-record(cPol_dcl,
 { mcode :: binary(),
   scode :: binary(),
   dcl :: binary()

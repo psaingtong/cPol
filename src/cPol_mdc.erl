@@ -6,7 +6,7 @@
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
--export([get_dc/1, create_table/1,import_data/0,get_icd10/1, check_data/0, import_data_ax/0]).
+-export([init/1, get_dc/1, create_table/1, get_icd10/1]).
 -export_type([dc/0]).
 
 -opaque dc() :: #cPol_dc{}.
@@ -18,98 +18,93 @@ create_table(Nodes) ->
       {disc_copies, Nodes}]),
   ok.
 
+init(FilePath)->
+  {ok,HH}=cPol_util:recursively_list_dir(FilePath),
+  even_list_dc(FilePath,HH),
+  ok.
+
+even_list_dc(FilePath,[])-> [];
+even_list_dc(FilePath,[H|T]) ->
+  [A,_] = string:tokens(H, "."),
+  [_,_,Mgr,F] = string:tokens(A, "/"),
+  list_data(Mgr,F,H),
+  even_list_dc(FilePath,T).
+
+list_data(Mgr,F,FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    D1=string:slice(F,0,2),
+    if
+      D1=:="dd" ->ok ;
+      true ->
+        if
+          D1=:="ax" ->
+            get_data_ax(Mgr,F,FilePath);
+          true ->
+            [A,B] = string:tokens(F, "_"),
+            if
+              B=:="icd9" ->
+                get_data_icd(Mgr,FilePath);
+              true ->
+                get_data_icd(Mgr,FilePath)
+            end
+
+        end
+    end,
+    Buffer
+                end,
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      cPol_util:start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
+
+get_data_ax(Mgr,F,FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    [A|[]]=Line,
+    %io:format("LineFFF: ~p~n",[F]),
+    Code0=string:join([Mgr, A], ":"),
+    Code=string:join([Code0, F], ":"),
+    io:format("code===: ~p~n",[Code]),
+    case get_icd10(Code) of
+        undefined->
+          mnesia:dirty_write(
+            #cPol_dc{code=Code,mdc=Mgr,mcode=A,ax=F});
+      _ ->ok
+    end,
+    Buffer
+                end,
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      cPol_util:start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+get_data_icd(Mgr,FilePath)->
+  ForEachLine = fun(Line,Buffer)->
+    [A,B|[]]=Line,
+    %io:format("Line: ~p~p~n",[A,B]),
+    Code=string:join([Mgr, A], ":"),
+    io:format("code===: ~p~n",[Code]),
+    case get_icd10(Code) of
+      undefined->
+        mnesia:dirty_write(
+          #cPol_dc{code=Code,mdc=Mgr,mcode=A,key=B});
+      _ ->ok
+    end,
+    Buffer
+                end,
+  case file:open(FilePath,[read]) of
+    {_,S} ->
+      cPol_util:start_parsing(S,ForEachLine,[]);
+    Error -> Error
+  end.
+
 get_dc(Mdc)->
   case Mdc of
       5->
         io:format("Mdc--------~p~n",[Mdc]),
         ok;
     _ -> undefined
-  end.
-
-import_data()->
-  FilePath="data/mdc/25",
-  FileName="mdc25_icd10.csv",
-  FilePathName=string:join([FilePath, FileName], "/"),
-  ForEachLine = fun(Line,Buffer)->
-    [A,B|[]]=Line,
-    Mgr="25",
-    Code=string:join([Mgr, A], ":"),
-    %io:format("Line: ~p~p~n",[A,B]),
-    case get_icd10(Code) of
-        undefined->
-          F = fun() ->
-            mnesia:dirty_write(
-              #cPol_dc{code=Code,mdc=Mgr,mcode=A,key=B})
-              end,
-          ok = mnesia:activity(transaction, F);
-
-      _ ->
-        io:format("Old--------~p~n",[Code])
-    end,
-    Buffer
-                end,
-  case file:open(FilePathName,[read]) of
-    {_,S} ->
-      cPol_util:start_parsing(S,ForEachLine,[]);
-    Error -> Error
-  end.
-
-import_data_ax()->
-  FilePath="data/mdc/25",
-  FileName="ax_25dx.csv",
-  B="ax_25dx",
-  Mgr="25",
-  FilePathName=string:join([FilePath, FileName], "/"),
-  ForEachLine = fun(Line,Buffer)->
-    [A|[]]=Line,
-    Code0=string:join([Mgr, A], ":"),
-    Ax="ax",
-    Code=string:join([Code0, Ax], ":"),
-    io:format("Line: ~p~n",[Code]),
-    case get_icd10(Code) of
-      undefined->
-        F = fun() ->
-          mnesia:dirty_write(
-            #cPol_dc{code=Code,mdc=Mgr,mcode=A,ax=B})
-            end,
-        ok = mnesia:activity(transaction, F);
-
-      Dc ->
-        io:format("Old--------~p~n",[Code])
-    end,
-    Buffer
-                end,
-  case file:open(FilePathName,[read]) of
-    {_,S} ->
-      cPol_util:start_parsing(S,ForEachLine,[]);
-    Error -> Error
-  end.
-
-check_data()->
-  FilePath="data/mdc/0",
-  FileName="ax0pex.csv",
-  %FileName="mdc5_icd9.csv",
-  Mgr="0",
-  FilePathName=string:join([FilePath, FileName], "/"),
-  ForEachLine = fun(Line,Buffer)->
-    [A|[]]=Line,
-    Code=string:join([Mgr, A], ":"),
-    %Ax="ax",
-    %Code1=string:join([Code, Ax], ":"),
-    %io:format("Line: ~p~p~n",[A,B]),
-    case get_icd10(Code) of
-      undefined->
-        io:format("New--------~p~n",[Code]);
-      _ ->
-        io:format("Old--------~p~n",[Code]),
-        ok
-    end,
-    Buffer
-                end,
-  case file:open(FilePathName,[read]) of
-    {_,S} ->
-      cPol_util:start_parsing(S,ForEachLine,[]);
-    Error -> Error
   end.
 
 -spec get_icd10(binary()) -> dc() | undefined.

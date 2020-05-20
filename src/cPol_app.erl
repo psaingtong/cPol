@@ -36,11 +36,13 @@ start(_StartType, _StartArgs) ->
     %io:format("DRG--------~p~n",[Drg]),
     %%%
     %%Mdc - init
+    FilePathMdc="data/mdc/22",
+    %cPol_mdc:init(FilePathMdc),
     %cPol_mdc:check_data(),
     %cPol_mdc:import_data(),
     %cPol_mdc:import_data_ax(),
-    %Icd10=cPol_mdc:get_icd10("25:a812:ax"),
-    %io:format("Icd10--------~p~n",[Icd10]),
+    Icd10=cPol_mdc:get_icd10("22:9915:ax_22pex"),
+    io:format("Icd10--------~p~n",[Icd10]),
     %%%%%
     %cPol_icd10:check_pdx("c602"),
 
@@ -60,7 +62,8 @@ start(_StartType, _StartArgs) ->
 
 
     %%%%
-    %Data=cPol_pcl:init(),
+    %FilePath="data/dcl/b",
+    %cPol_pcl:init(FilePath),
     %FilePath="/home/datawiz5/utth/cc_app",
     %FileName="k250.csv",
     %FilePathName=string:join([FilePath, FileName], "/"),
@@ -70,8 +73,6 @@ start(_StartType, _StartArgs) ->
 
     %Te3=cPol_pcl:get_code("i10:0011"),
     %io:format("D Test--------~p~n",[Te3]),
-
-    cPol_pcl:test(),
 
     cPol_sup:start_link().
 

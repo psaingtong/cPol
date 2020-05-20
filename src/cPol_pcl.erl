@@ -6,16 +6,18 @@
 -include("cPol_db.hrl").
 -include_lib("stdlib/include/qlc.hrl").
 %% API
--export([init/0, list_data/1, import_data/2, get_code/1, create_table/1,get_pdc/0,initcc/0,test/0]).
--export_type([dcl/0, dcl_ae/0, dcl_fj/0, dcl_ko/0, dcl_pz/0]).
+-export([init/1, get_code/1, create_table/1,get_pdc/0]).
+-export_type([dcl/0]).
 
--opaque dcl() :: #cPol_dcl_test{}.
--opaque dcl_ae() :: #cPol_dcl_ae{}.
--opaque dcl_fj() :: #cPol_dcl_fj{}.
--opaque dcl_ko() :: #cPol_dcl_ko{}.
--opaque dcl_pz() :: #cPol_dcl_pz{}.
+-opaque dcl() :: #cPol_dcl{}.
 
-init() ->
+init(FilePath)->
+  {ok,HH}=cPol_util:recursively_list_dir(FilePath),
+  %io:format("DDDD: ~p~n",[HH]),
+  even_list_cc(FilePath,HH),
+  ok.
+
+init1() ->
   %Data=[{"I213",2},{"E119",1},{"I10",1},{"N182",0},{"I092",1},{"K250",3},{"I209",0},{"A419",2},{"E875",1},{"E876",1}],
   Data=[{"I213",2},{"E119",1},{"I10",1},{"N182",0},{"I092",1},{"K250",3},{"I209",0},{"A419",2},{"E875",0},{"E876",1}],
 
@@ -89,28 +91,15 @@ even_list22([H|T]) ->
 
 -spec create_table([node()]) -> ok.
 create_table(Nodes) ->
-  {atomic, ok} = mnesia:create_table(cPol_dcl_test,
-    [{attributes, record_info(fields, cPol_dcl_test)},
-      {disc_copies, Nodes}]),
-  {atomic, ok} = mnesia:create_table(cPol_dcl_ae,
-    [{attributes, record_info(fields, cPol_dcl_ae)},
-      {disc_copies, Nodes}]),
-  {atomic, ok} = mnesia:create_table(cPol_dcl_fj,
-    [{attributes, record_info(fields, cPol_dcl_fj)},
-      {disc_copies, Nodes}]),
-  {atomic, ok} = mnesia:create_table(cPol_dcl_ko,
-    [{attributes, record_info(fields, cPol_dcl_ko)},
-      {disc_copies, Nodes}]),
-  {atomic, ok} = mnesia:create_table(cPol_dcl_pz,
-    [{attributes, record_info(fields, cPol_dcl_pz)},
+  {atomic, ok} = mnesia:create_table(cPol_dcl,
+    [{attributes, record_info(fields, cPol_dcl)},
       {disc_copies, Nodes}]),
   ok.
 
-list_data(FilePath)->
+list_data(F,FilePath)->
   ForEachLine = fun(Line,Buffer)->
-    io:format("Line: ~p~n",[Line]),
-    %[H|[]]=Line,
-    %io:format("Line: ~p~n",[H]),
+    %io:format("Line22: ~p~n",[Line]),
+    even_list_cc1(F,Line),
     Buffer
                 end,
   case file:open(FilePath,[read]) of
@@ -119,53 +108,40 @@ list_data(FilePath)->
     Error -> Error
   end.
 
-test()->
-  FilePath="data/dcl/a",
-  {ok,HH}=cPol_util:recursively_list_dir(FilePath),
-  %io:format("DDDD: ~p~n",[HH]),
-  even_list_cc(HH),
 
-  ok.
-even_list_cc([])-> [];
-even_list_cc([H|T]) ->
-  io:format("::: ~p~n", [H]),
-  list_data(H),
-  even_list_cc(T).
+even_list_cc(FilePath,[])-> [];
+even_list_cc(FilePath,[H|T]) ->
+  %io:format("Filename::: ~p~n", [H]),
+  [A,_] = string:tokens(H, "."),
+  [_,_,_,F] = string:tokens(A, "/"),
+  io:format("A=::: ~p~n", [F]),
+  list_data(F,H),
+  even_list_cc(FilePath,T).
 
-
-import_data(FilePath,FileName)->
-  FilePathName=string:join([FilePath, FileName], "/"),
-  ForEachLine = fun(Line,Buffer)->
-    [H|[]]=Line,
-    %io:format("Line: ~p~n",[H]),
-    [A,B] = string:tokens(FileName, "."),
-    [Scode,Dcl] = string:tokens(H, ":"),
-    Mcode=string:join([A, Scode], ":"),
-
+even_list_cc1(F,[])-> [];
+even_list_cc1(F,[H|T]) ->
+  case H of
+      []->ok;
+    _ ->
+      [Scode,Dcl] = string:tokens(H, ":"),
+      Mcode=string:join([F, Scode], ":"),
       case get_code(Mcode) of
         undefined ->
-          F = fun() ->
-          mnesia:dirty_write(
-            #cPol_dcl_test{mcode=Mcode,scode=Scode,dcl=Dcl})
-              end,
-          ok = mnesia:activity(transaction, F);
-         _ ->
-           ok
-      end,
+          io:format(":::==== ~p=~p=~p=~p~n", [H,Mcode,Scode,Dcl]),
+          ok=mnesia:dirty_write(
+            #cPol_dcl{mcode=Mcode,scode=Scode,dcl=Dcl});
+        _ ->
+          io:format("==old==~p=~p=~p~n", [Mcode,Scode,Dcl])
+      end
+  end,
+  even_list_cc1(F,T).
 
-    Buffer
-                end,
-  case file:open(FilePathName,[read]) of
-    {_,S} ->
-      cPol_util:start_parsing(S,ForEachLine,[]);
-    Error -> Error
-  end.
 
 -spec get_code(binary()) -> dcl() | undefined.
 get_code(Code) ->
   F = fun() ->
     qlc:e(qlc:q(
-      [X || X = #cPol_dcl_test{mcode=C} <- mnesia:table(cPol_dcl_test),
+      [X || X = #cPol_dcl{mcode=C} <- mnesia:table(cPol_dcl),
         string:equal(Code, C, true)]))
       end,
   case mnesia:activity(transaction, F) of
@@ -226,7 +202,7 @@ get_dcl(Mcode,H) ->
       DC=[{H,0}],
       DC;
     Dcl ->
-      DC1=Dcl#cPol_dcl_test.dcl,
+      DC1=Dcl#cPol_dcl.dcl,
       DC=[{H,list_to_integer(DC1)}],
     DC
   end.

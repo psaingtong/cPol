@@ -1,0 +1,33 @@
+%%%-------------------------------------------------------------------
+%%% Created : 22. May 2020 7:27 น.
+%%%-------------------------------------------------------------------
+
+-define(MDC_AX,
+  [{"0","ax_0cx:ax_0dx:ax_0ex:ax_0fx:ax_0gx:ax_0hx:ax_0pbx:ax_0pcx:ax_0pdx:ax_0pex"},
+  {"1","ax_1bx:ax_1cx,ax_1pbx"},
+  {"2","ax_2bx:ax_2pcx:ax_2pdx"},
+  {"3","ax_3pbx:ax_3pcx:ax_3pex"},
+  {"4","ax_4pcx"},
+  {"5","ax_5bx:ax_5cx:ax_5dx:ax_5pbx:ax_5pcx:ax_5pdx:ax_5pex:ax_5pfx:ax_5pgx:ax_5phx:ax_5pjx"},
+  {"6","ax_6bx:ax_6cx:ax_6pbx"},
+  {"7","ax_7pbx:ax_7pdx"},
+  {"8","ax_8pcx:ax_8pdx:ax_8pex:ax_8pfx"},
+  {"9","ax_9bx:ax_9pbx:ax_9pcx:ax_9pdx"},
+  {"10",""},
+  {"11","ax_11pbx:ax_11pcx"},
+  {"12","ax_12pbx"},
+  {"13","ax_13pbx"},
+  {"14","ax_14bx:ax_14ex:ax_14fx:ax_14gx:ax_14hx:ax_14jx:ax_14lx:ax_14mx:ax_14pbx:ax_14pcx:ax_14pex:ax_14pgx:ax_14phx"},
+  {"15","ax_15pbx:ax_15pcx:ax_15pdx:ax_15pex"},
+  {"16","ax_16pbx"},
+  {"17","ax_17pbx"},
+  {"18","ax_18bx"},
+  {"19","ax_19pbx"},
+  {"20",""},
+  {"21",""},
+  {"22","ax_22bx:ax_22pbx:ax_22pcx:ax_22pdx:ax_22pex"},
+  {"23","ax_23bx:ax_23pbx"},
+  {"24","ax_24pbx"},
+  {"25","ax_25bx:ax_25cx:ax_25dx"},
+    {"99","ax_99bx:ax_99cx:ax_99pbx:ax_99pex:ax_99pfx:ax_99pgx"}
+  ]).
